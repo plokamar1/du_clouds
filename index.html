@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="js/pixi.min.js"></script>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let app;
+        let appWidth;
+        let appHeight;
+        let bgBack, bgMiddle, bgFront;
+        let bgX = 0;
+        let bgSpeed = 0.5;
+        const blurSize = 150;
+        const size = ["908", "562"];
+        const ratio = size[0]/size[1];
+
+        window.onload = () => {
+            app = new PIXI.Application(
+                {   
+                    view: document.getElementById('du-clouds'),
+                    width: size[0],
+                    height: size[1],
+                    backgroundColor: 0x73C9E1
+                    
+                }
+            );
+            document.body.appendChild(app.view);
+
+            app.loader.baseUrl = "images";
+            app.loader.add("bgBack", "cloud_1.png")
+                      .add("bgMiddle", "cloud_2.png")
+                      .add("bgFront", "cloud_3.png")
+                      .add("bgLaptop", "laptop.png");
+
+            app.loader.onComplete.add(initLevel);
+            app.loader.load();
+        }
+        
+        var gameLoop = (delta) =>{
+            updateBg();
+        }
+
+        var initLevel = () => {
+
+            bgBack = createBg(app.loader.resources["bgBack"].texture, -app.screen.height/8);
+            bgMiddle = createBg(app.loader.resources["bgMiddle"].texture, app.screen.height/2 );
+            bgFront = createBg(app.loader.resources["bgFront"].texture, app.screen.height/6);
+            
+            bgLaptop = createFg(app.loader.resources["bgLaptop"].texture)
+            
+            const circle = new PIXI.Graphics()
+            .beginFill(0xFF0000)
+            .drawEllipse((app.screen.width)/2, (app.screen.height) /2 , (app.screen.width - blurSize) /2, (app.screen.height - blurSize) /2)
+            .endFill();
+
+            circle.filters = [new PIXI.filters.BlurFilter(blurSize)];
+
+            const bounds = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
+            const texture = app.renderer.generateTexture(circle, PIXI.SCALE_MODES.NEAREST, 1, bounds);
+            const focus = new PIXI.Sprite(texture);
+
+            app.stage.addChild(focus);
+            
+            bgBack.mask = focus;
+            bgMiddle.mask = focus;
+            bgFront.mask = focus;
+
+            // app.stage.addChild(circle)
+            document.addEventListener('mouseMove', moveAccordingly); 
+            app.ticker.add(gameLoop);
+        }
+
+        var moveAccordingly = (e) => {
+
+        }
+
+        var createBg = (texture, yPosition) => {
+            const tiling = new PIXI.TilingSprite(texture, texture.width*2, texture.height )
+            tiling.position.set( 0 , yPosition );
+            app.stage.addChild(tiling);
+
+            return tiling;
+        }
+
+        var createFg = (texture) => {
+            const fg = new PIXI.Sprite(texture);
+            
+            fg.anchor.set(0.5);
+
+            var fgHeight = (app.screen.width * texture.height )/ texture.width;
+            
+            fg.width  = app.screen.width;
+            fg.height = fgHeight;
+
+            fg.position.set(app.screen.width/2, app.screen.height/2);
+            app.stage.addChild(fg);
+
+            return fg;
+        }
+
+        var updateBg = () => {
+            bgX = (bgX + bgSpeed);
+            bgFront.tilePosition.x = bgX ;
+            bgMiddle.tilePosition.x = bgX / 2;
+            bgBack.tilePosition.x = bgX / 4;
+        }
+    </script>
+</head>
+<body>
+    <canvas id="du-clouds"></canvas>
+</body>
+</html>
