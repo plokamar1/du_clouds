@@ -41,8 +41,16 @@ Written by Panagiotis Dorgiakis
                       .add("bgFront", "cloud_3.png")
                       .add("bgLaptop", "laptop.png");
 
-            app.loader.onComplete.add(initLevel);
+            app.loader.onComplete.add(()=>{
+                //TODO:
+                //1. Firstly add a picture there by default
+                //2. create the canvas element
+                //3. add it to the dom and remove the picture
+
+                initLevel();
+            });
             app.loader.load();
+
         }
         
         var gameLoop = (delta) =>{
